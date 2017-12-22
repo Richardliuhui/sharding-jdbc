@@ -133,11 +133,18 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
             clearBatch();
         }
     }
-    
+
+    /***
+     * 执行
+     * @return
+     * @throws SQLException
+     */
     @Override
     public boolean execute() throws SQLException {
         try {
+            //sql 路由
             Collection<PreparedStatementUnit> preparedStatementUnits = route();
+            //真正去数据库执行SQL
             return new PreparedStatementExecutor(
                     getConnection().getShardingContext().getExecutorEngine(), routeResult.getSqlStatement().getType(), preparedStatementUnits, getParameters()).execute();
         } finally {
@@ -147,6 +154,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     
     private Collection<PreparedStatementUnit> route() throws SQLException {
         Collection<PreparedStatementUnit> result = new LinkedList<>();
+        //路由引擎进行路由getParameters的值在PreparedStatemen.set参数时已经传入
         routeResult = routingEngine.route(getParameters());
         for (SQLExecutionUnit each : routeResult.getExecutionUnits()) {
             SQLType sqlType = routeResult.getSqlStatement().getType();
@@ -158,6 +166,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
             }
             routedStatements.addAll(preparedStatements);
             for (PreparedStatement preparedStatement : preparedStatements) {
+                //preparedStatement设置参数值
                 replaySetParameter(preparedStatement);
                 result.add(new PreparedStatementUnit(each, preparedStatement));
             }
@@ -175,6 +184,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     }
     
     private PreparedStatement generatePreparedStatement(final SQLExecutionUnit sqlExecutionUnit) throws SQLException {
+        //根据dataSource name获取对应的connection
         Connection connection = getConnection().getConnection(sqlExecutionUnit.getDataSource(), routeResult.getSqlStatement().getType());
         return returnGeneratedKeys ? connection.prepareStatement(sqlExecutionUnit.getSql(), Statement.RETURN_GENERATED_KEYS)
                 : connection.prepareStatement(sqlExecutionUnit.getSql(), resultSetType, resultSetConcurrency, resultSetHoldability);

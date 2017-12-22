@@ -31,12 +31,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public final class ShardingContext {
-    
+    /***
+     * 分片规则
+     */
     private final ShardingRule shardingRule;
-    
+    /***
+     * 数据库类型
+     */
     private final DatabaseType databaseType;
-    
+    /***
+     * 执行引擎
+     */
     private final ExecutorEngine executorEngine;
-    
+    /***
+     * 是否打印SQL
+     */
     private final boolean showSQL;
 }

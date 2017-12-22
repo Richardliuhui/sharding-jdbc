@@ -41,13 +41,19 @@ import java.util.List;
 public abstract class AbstractSQLStatement implements SQLStatement {
     
     private final SQLType type;
-    
+    /***
+     * 表集合
+     */
     private final Tables tables = new Tables();
-    
+    /**
+     * 当列名作为分库或分表的列时会记录在此
+     */
     private final Conditions conditions = new Conditions();
     
     private final List<SQLToken> sqlTokens = new LinkedList<>();
-    
+    /**
+     * 参数值的index,如有三个要设置值的则为3
+     */
     private int parametersIndex;
     
     @Override

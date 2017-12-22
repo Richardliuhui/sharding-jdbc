@@ -26,7 +26,7 @@ import java.util.Collections;
 
 /**
  * None sharding strategy.
- * 
+ * 对于没有配置分片规则的使用的策略,直接返回默认dataSource
  * @author zhangliang
  */
 @Getter

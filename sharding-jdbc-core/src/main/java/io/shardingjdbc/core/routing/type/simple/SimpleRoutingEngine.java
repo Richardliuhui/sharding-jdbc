@@ -58,8 +58,11 @@ public final class SimpleRoutingEngine implements RoutingEngine {
     @Override
     public RoutingResult route() {
         TableRule tableRule = shardingRule.getTableRule(logicTableName);
+        //获取分库的分片值
         List<ShardingValue> databaseShardingValues = getDatabaseShardingValues(tableRule);
+        //获取分表的分片值
         List<ShardingValue> tableShardingValues = getTableShardingValues(tableRule);
+        //分库路由
         Collection<String> routedDataSources = routeDataSources(tableRule, databaseShardingValues);
         Collection<DataNode> routedDataNodes = new LinkedList<>();
         for (String each : routedDataSources) {
@@ -67,12 +70,22 @@ public final class SimpleRoutingEngine implements RoutingEngine {
         }
         return generateRoutingResult(routedDataNodes);
     }
-    
+
+    /***
+     * 根据表规则获取库分片值
+     * @param tableRule
+     * @return
+     */
     private List<ShardingValue> getDatabaseShardingValues(final TableRule tableRule) {
         ShardingStrategy strategy = shardingRule.getDatabaseShardingStrategy(tableRule);
         return HintManagerHolder.isUseShardingHint() ? getDatabaseShardingValuesFromHint(strategy.getShardingColumns()) : getShardingValues(strategy.getShardingColumns());
     }
-    
+
+    /***
+     * 根据表规则获取表分片值
+     * @param tableRule
+     * @return
+     */
     private List<ShardingValue> getTableShardingValues(final TableRule tableRule) {
         ShardingStrategy strategy = shardingRule.getTableShardingStrategy(tableRule);
         return HintManagerHolder.isUseShardingHint() ? getTableShardingValuesFromHint(strategy.getShardingColumns()) : getShardingValues(strategy.getShardingColumns());
@@ -102,27 +115,45 @@ public final class SimpleRoutingEngine implements RoutingEngine {
     
     private List<ShardingValue> getShardingValues(final Collection<String> shardingColumns) {
         List<ShardingValue> result = new ArrayList<>(shardingColumns.size());
+        //循环所有分片列
         for (String each : shardingColumns) {
             Optional<Condition> condition = sqlStatement.getConditions().find(new Column(each, logicTableName));
+            //如果存在condition,则获取分片值
             if (condition.isPresent()) {
                 result.add(condition.get().getShardingValue(parameters));
             }
         }
         return result;
     }
-    
+
+    /***
+     * 分库路由
+     * @param tableRule
+     * @param databaseShardingValues
+     * @return
+     */
     private Collection<String> routeDataSources(final TableRule tableRule, final List<ShardingValue> databaseShardingValues) {
         Collection<String> availableTargetDatabases = tableRule.getActualDatasourceNames();
+        //如果分库分片值为空,则取默认的dataSource,此时的availableTargetDatabases就是默认的
         if (databaseShardingValues.isEmpty()) {
             return availableTargetDatabases;
         }
+        //调用tableRule对应的分库策略获取分库值
         Collection<String> result = shardingRule.getDatabaseShardingStrategy(tableRule).doSharding(availableTargetDatabases, databaseShardingValues);
         Preconditions.checkState(!result.isEmpty(), "no database route info");
         return result;
     }
-    
+
+    /***
+     * 分表路由
+     * @param tableRule
+     * @param routedDataSource
+     * @param tableShardingValues
+     * @return
+     */
     private Collection<DataNode> routeTables(final TableRule tableRule, final String routedDataSource, final List<ShardingValue> tableShardingValues) {
         Collection<String> availableTargetTables = tableRule.getActualTableNames(routedDataSource);
+        //如果分表的分片值为空,则取默认的表,反之则调用对应的分表策略获取分片值
         Collection<String> routedTables = tableShardingValues.isEmpty() ? availableTargetTables
                 : shardingRule.getTableShardingStrategy(tableRule).doSharding(availableTargetTables, tableShardingValues);
         Preconditions.checkState(!routedTables.isEmpty(), "no table route info");

@@ -65,12 +65,20 @@ public final class ParsingSQLRouter implements SQLRouter {
         showSQL = shardingContext.isShowSQL();
         generatedKeys = new LinkedList<>();
     }
-    
+
+    /***
+     * sql 解析
+     * @param logicSQL logic SQL
+     * @param parametersSize parameters size
+     * @return
+     */
     @Override
     public SQLStatement parse(final String logicSQL, final int parametersSize) {
         SQLParsingEngine parsingEngine = new SQLParsingEngine(databaseType, logicSQL, shardingRule);
+        //sql 解析引擎进行sql解析
         SQLStatement result = parsingEngine.parse();
         if (result instanceof InsertStatement) {
+            //如果是insert 则添加ItemsToken到SqlTokens
             ((InsertStatement) result).appendGenerateKeyToken(shardingRule, parametersSize);
         }
         return result;
@@ -79,15 +87,19 @@ public final class ParsingSQLRouter implements SQLRouter {
     @Override
     public SQLRouteResult route(final String logicSQL, final List<Object> parameters, final SQLStatement sqlStatement) {
         SQLRouteResult result = new SQLRouteResult(sqlStatement);
+        //如果是insert 则生成唯一ID
         if (sqlStatement instanceof InsertStatement && null != ((InsertStatement) sqlStatement).getGeneratedKey()) {
             processGeneratedKey(parameters, (InsertStatement) sqlStatement, result);
         }
+        //路由,路由后可知道具体入到哪个库的哪个表
         RoutingResult routingResult = route(parameters, sqlStatement);
+        //sql 重写引擎
         SQLRewriteEngine rewriteEngine = new SQLRewriteEngine(shardingRule, logicSQL, databaseType, sqlStatement);
         boolean isSingleRouting = routingResult.isSingleRouting();
         if (sqlStatement instanceof SelectStatement && null != ((SelectStatement) sqlStatement).getLimit()) {
             processLimit(parameters, (SelectStatement) sqlStatement, isSingleRouting);
         }
+        //SQL 重写
         SQLBuilder sqlBuilder = rewriteEngine.rewrite(!isSingleRouting);
         if (routingResult instanceof CartesianRoutingResult) {
             for (CartesianDataSource cartesianDataSource : ((CartesianRoutingResult) routingResult).getRoutingDataSources()) {
@@ -97,6 +109,7 @@ public final class ParsingSQLRouter implements SQLRouter {
             }
         } else {
             for (TableUnit each : routingResult.getTableUnits().getTableUnits()) {
+                //这里把逻辑表改为路由后的表
                 result.getExecutionUnits().add(new SQLExecutionUnit(each.getDataSourceName(), rewriteEngine.generateSQL(each, sqlBuilder)));
             }
         }
@@ -125,7 +138,9 @@ public final class ParsingSQLRouter implements SQLRouter {
         if (parameters.isEmpty()) {
             sqlRouteResult.getGeneratedKeys().add(generatedKey.getValue());
         } else if (parameters.size() == generatedKey.getIndex()) {
+            //生成唯一序列
             Number key = shardingRule.generateKey(insertStatement.getTables().getSingleTableName());
+            //把生成的ID放入到parameters里
             parameters.add(key);
             setGeneratedKeys(sqlRouteResult, key);
         } else if (-1 != generatedKey.getIndex()) {

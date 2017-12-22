@@ -44,7 +44,7 @@ public final class PreparedStatementRoutingEngine {
     
     /**
      * SQL route.
-     * 
+     * sql 路由
      * <p>First routing time will parse SQL, after second time will reuse first parsed result.</p>
      * 
      * @param parameters parameters of SQL placeholder
@@ -52,8 +52,10 @@ public final class PreparedStatementRoutingEngine {
      */
     public SQLRouteResult route(final List<Object> parameters) {
         if (null == sqlStatement) {
+            //sql解析
             sqlStatement = sqlRouter.parse(logicSQL, parameters.size());
         }
+        //sql路由
         return sqlRouter.route(logicSQL, parameters, sqlStatement);
     }
 }

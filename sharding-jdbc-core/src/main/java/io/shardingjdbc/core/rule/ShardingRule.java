@@ -115,6 +115,7 @@ public final class ShardingRule {
         if (tableRule.isPresent()) {
             return tableRule.get();
         }
+        //如果没有配置分片规则,则取默认数据源
         if (null != defaultDataSourceName) {
             return createTableRuleWithDefaultDataSource(logicTableName);
         }

@@ -48,17 +48,27 @@ import java.util.List;
 @Setter
 @ToString
 public final class InsertStatement extends DMLStatement {
-    
+    /***
+     * 列名集合
+     */
     private final Collection<Column> columns = new LinkedList<>();
     
     private final List<Conditions> multipleConditions = new LinkedList<>();
-    
+    /***
+     * 最后列的位置
+     */
     private int columnsListLastPosition;
-    
+    /***
+     * 生成自动key列的index
+     */
     private int generateKeyColumnIndex = -1;
-    
+    /***
+     *第一个value的位置
+     */
     private int afterValuesPosition;
-    
+    /***
+     * value最后位置(最后的?位置),
+     */
     private int valuesListLastPosition;
     
     private GeneratedKey generatedKey;
@@ -85,6 +95,7 @@ public final class InsertStatement extends DMLStatement {
         if (0 == parametersSize) {
             appendGenerateKeyToken(shardingRule, tableRule.get(), valuesToken);
         } else {
+            //把主键生成列放入Condition,后续分库分表的分片值从Condition获取
             appendGenerateKeyToken(shardingRule, tableRule.get(), valuesToken, parametersSize);
         }
         getSqlTokens().remove(generatedKeysToken.get());

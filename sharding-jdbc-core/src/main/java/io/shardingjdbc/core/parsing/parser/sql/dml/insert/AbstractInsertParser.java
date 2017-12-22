@@ -50,18 +50,26 @@ public abstract class AbstractInsertParser implements SQLParser {
         this.lexerEngine = lexerEngine;
         this.insertClauseParserFacade = insertClauseParserFacade;
     }
-    
+
+    /***
+     * insert sql 解析
+     * @return
+     */
     @Override
     public final DMLStatement parse() {
         lexerEngine.nextToken();
         InsertStatement result = new InsertStatement();
+        //表名解析
         insertClauseParserFacade.getInsertIntoClauseParser().parse(result);
+        //列名解析
         insertClauseParserFacade.getInsertColumnsClauseParser().parse(result);
         if (lexerEngine.equalAny(DefaultKeyword.SELECT, Symbol.LEFT_PAREN)) {
             throw new UnsupportedOperationException("Cannot INSERT SELECT");
         }
+        //解析values
         insertClauseParserFacade.getInsertValuesClauseParser().parse(result);
         insertClauseParserFacade.getInsertSetClauseParser().parse(result);
+        //处理生成列
         appendGenerateKey(result);
         return result;
     }
@@ -74,7 +82,9 @@ public abstract class AbstractInsertParser implements SQLParser {
         } 
         ItemsToken columnsToken = new ItemsToken(insertStatement.getColumnsListLastPosition());
         columnsToken.getItems().add(generateKeyColumn.get());
+        //把主键生成的列放入到现有列的最后位置,添加到sqlTokens
         insertStatement.getSqlTokens().add(columnsToken);
+        //把主键列的?放到所有?的最后面 如insert into t_order(user_id,status,order_id) values(?,?,?)
         insertStatement.getSqlTokens().add(new GeneratedKeyToken(insertStatement.getValuesListLastPosition()));
     }
 }

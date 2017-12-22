@@ -38,7 +38,9 @@ public final class Condition {
     
     @Getter
     private final ShardingOperator operator;
-    
+    /***
+     * key从0开始,value为参数的第几个
+     */
     private final Map<Integer, Comparable<?>> positionValueMap = new LinkedHashMap<>();
     
     private final Map<Integer, Integer> positionIndexMap = new LinkedHashMap<>();

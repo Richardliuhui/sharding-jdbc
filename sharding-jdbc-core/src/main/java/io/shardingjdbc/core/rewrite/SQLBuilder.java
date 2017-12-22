@@ -75,6 +75,7 @@ public final class SQLBuilder {
     public String toSQL(final Map<String, String> tableTokens) {
         StringBuilder result = new StringBuilder();
         for (Object each : segments) {
+            //如果是TableToken,则会把逻辑表名改为路由后的表
             if (each instanceof TableToken && tableTokens.containsKey(((TableToken) each).tableName)) {
                 result.append(tableTokens.get(((TableToken) each).tableName));
             } else {

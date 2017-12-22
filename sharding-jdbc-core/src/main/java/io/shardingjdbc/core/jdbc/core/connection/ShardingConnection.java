@@ -43,6 +43,7 @@ import java.util.Map.Entry;
 
 /**
  * Connection that support sharding.
+ * 实现了Connection接口
  * 
  * @author zhangliang
  * @author gaohongtao
@@ -130,7 +131,13 @@ public final class ShardingConnection extends AbstractConnectionAdapter {
     public DatabaseMetaData getMetaData() throws SQLException {
         return getConnection(shardingContext.getShardingRule().getDataSourceMap().keySet().iterator().next(), SQLType.DQL).getMetaData();
     }
-    
+
+    /***
+     *
+     * @param sql
+     * @return
+     * @throws SQLException
+     */
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
         return new ShardingPreparedStatement(this, sql);

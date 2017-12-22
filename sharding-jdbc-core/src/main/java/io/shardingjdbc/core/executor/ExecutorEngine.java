@@ -118,12 +118,16 @@ public final class ExecutorEngine implements AutoCloseable {
         OverallExecutionEvent event = new OverallExecutionEvent(sqlType, baseStatementUnits.size());
         EventBusInstance.getInstance().post(event);
         Iterator<? extends BaseStatementUnit> iterator = baseStatementUnits.iterator();
+        //取第一个sql执行单元
         BaseStatementUnit firstInput = iterator.next();
+        //如果执行sql大于1,则第一个之外的SQL异步执行
         ListenableFuture<List<T>> restFutures = asyncExecute(sqlType, Lists.newArrayList(iterator), parameterSets, executeCallback);
         T firstOutput;
         List<T> restOutputs;
         try {
+            //第一个sql同步执行
             firstOutput = syncExecute(sqlType, firstInput, parameterSets, executeCallback);
+            //获取其它sql结果
             restOutputs = restFutures.get();
             //CHECKSTYLE:OFF
         } catch (final Exception ex) {

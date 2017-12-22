@@ -41,11 +41,13 @@ public final class InsertColumnsClauseParser implements SQLClauseParser {
                 String columnName = SQLUtil.getExactlyValue(lexerEngine.getCurrentToken().getLiterals());
                 result.add(new Column(columnName, tableName));
                 lexerEngine.nextToken();
+                //如果生成key的列在insert 语句里,则记录其位置
                 if (generateKeyColumn.isPresent() && generateKeyColumn.get().equalsIgnoreCase(columnName)) {
                     insertStatement.setGenerateKeyColumnIndex(count);
                 }
                 count++;
             } while (!lexerEngine.equalAny(Symbol.RIGHT_PAREN) && !lexerEngine.equalAny(Assist.END));
+            // 记录最后列的位置
             insertStatement.setColumnsListLastPosition(lexerEngine.getCurrentToken().getEndPosition() - lexerEngine.getCurrentToken().getLiterals().length());
             lexerEngine.nextToken();
         }

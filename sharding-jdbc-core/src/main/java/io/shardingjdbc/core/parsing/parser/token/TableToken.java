@@ -31,9 +31,13 @@ import lombok.ToString;
 @Getter
 @ToString
 public final class TableToken implements SQLToken {
-    
+    /***
+     * 起始位置
+     */
     private final int beginPosition;
-    
+    /***
+     * 原表名
+     */
     private final String originalLiterals;
     
     /**

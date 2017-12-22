@@ -65,6 +65,7 @@ public final class ExpressionClauseParser implements SQLClauseParser {
     }
     
     private SQLExpression getExpression(final String literals, final SQLStatement sqlStatement) {
+        //如果是?,记录参数的index
         if (lexerEngine.equalAny(Symbol.QUESTION)) {
             sqlStatement.increaseParametersIndex();
             return new SQLPlaceholderExpression(sqlStatement.getParametersIndex() - 1);

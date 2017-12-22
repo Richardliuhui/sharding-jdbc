@@ -35,10 +35,16 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Getter
 public final class SQLRouteResult {
-    
+    /***
+     * sql 解析的结果
+     */
     private final SQLStatement sqlStatement;
-    
+    /**
+     * 路由的后的SQLExecutionUnit
+     */
     private final Set<SQLExecutionUnit> executionUnits = new LinkedHashSet<>();
-    
+    /***
+     * 生成的主键列
+     */
     private final List<Number> generatedKeys = new LinkedList<>();
 }

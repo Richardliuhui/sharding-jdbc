@@ -317,6 +317,7 @@ public abstract class AbstractShardingPreparedStatementAdapter extends AbstractU
         addParameters();
         for (SetParameterMethodInvocation each : setParameterMethodInvocations) {
             updateParameterValues(each, parameters.get(each.getIndex() - 1));
+            //通过反映设置参数值
             each.invoke(preparedStatement);
         }
     }

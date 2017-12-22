@@ -45,8 +45,11 @@ public final class SQLParsingEngine {
      * @return parsed SQL statement
      */
     public SQLStatement parse() {
+        //分词引擎
         LexerEngine lexerEngine = LexerEngineFactory.newInstance(dbType, sql);
+        //next后就是首个关键字如insert update select
         lexerEngine.nextToken();
+        //根据数据库类型,操作类型,分片规则进行解析
         return SQLParserFactory.newInstance(dbType, lexerEngine.getCurrentToken().getType(), shardingRule, lexerEngine).parse();
     }
 }

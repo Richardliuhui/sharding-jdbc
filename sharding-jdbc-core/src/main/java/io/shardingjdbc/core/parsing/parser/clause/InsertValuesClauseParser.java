@@ -50,6 +50,7 @@ public class InsertValuesClauseParser implements SQLClauseParser {
         valueKeywords.add(DefaultKeyword.VALUES);
         valueKeywords.addAll(Arrays.asList(getSynonymousKeywordsForValues()));
         if (lexerEngine.skipIfEqual(valueKeywords.toArray(new Keyword[valueKeywords.size()]))) {
+            //记录value的开始位置
             insertStatement.setAfterValuesPosition(lexerEngine.getCurrentToken().getEndPosition() - lexerEngine.getCurrentToken().getLiterals().length());
             parseValues(insertStatement);
             if (lexerEngine.equalAny(Symbol.COMMA)) {
@@ -68,10 +69,12 @@ public class InsertValuesClauseParser implements SQLClauseParser {
         do {
             sqlExpressions.add(expressionClauseParser.parse(insertStatement));
         } while (lexerEngine.skipIfEqual(Symbol.COMMA));
+        //记录最后value的位置
         insertStatement.setValuesListLastPosition(lexerEngine.getCurrentToken().getEndPosition() - lexerEngine.getCurrentToken().getLiterals().length());
         int count = 0;
         for (Column each : insertStatement.getColumns()) {
             SQLExpression sqlExpression = sqlExpressions.get(count);
+            //属于分片的列才会添加到Conditions
             insertStatement.getConditions().add(new Condition(each, sqlExpression), shardingRule);
             if (insertStatement.getGenerateKeyColumnIndex() == count) {
                 insertStatement.setGeneratedKey(createGeneratedKey(each, sqlExpression));

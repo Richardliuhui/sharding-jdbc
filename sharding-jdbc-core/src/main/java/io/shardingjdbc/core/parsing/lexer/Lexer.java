@@ -33,14 +33,22 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class Lexer {
-    
+    /***
+     * 原始sql
+     */
     @Getter
     private final String input;
-    
+    /***
+     * sql 关键字字典
+     */
     private final Dictionary dictionary;
-    
+    /**
+     * 读取位置
+     */
     private int offset;
-    
+    /***
+     * 当前token
+     */
     @Getter
     private Token currentToken;
     
