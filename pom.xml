@@ -12,6 +12,7 @@
         <module>sharding-jdbc-transaction-parent</module>
         <module>sharding-jdbc-orchestration</module>
         <module>sharding-jdbc-orchestration-spring</module>
+        <module>sharding-jdbc-example</module>
     </modules>
     
     <properties>
@@ -666,15 +667,15 @@
             <timezone>8</timezone>
         </developer>
     </developers>
-    
+
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>nexus-snapshots</id>
+            <url>http://maven.idc.thejoyrun.com/nexus/content/groups/public-snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-releases</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <id>nexus-releases</id>
+            <url>http://maven.idc.thejoyrun.com/nexus/content/groups/public</url>
         </repository>
     </distributionManagement>
 </project>
