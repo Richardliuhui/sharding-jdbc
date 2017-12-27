@@ -98,7 +98,9 @@ public final class ShardingConnection extends AbstractConnectionAdapter {
         DataSource dataSource = shardingContext.getShardingRule().getDataSourceMap().get(dataSourceName);
         Preconditions.checkState(null != dataSource, "Missing the rule of %s in DataSourceRule", dataSourceName);
         String realDataSourceName;
+        //如果是读写分离
         if (dataSource instanceof MasterSlaveDataSource) {
+            //根据sqlType找到NamedDataSource
             NamedDataSource namedDataSource = ((MasterSlaveDataSource) dataSource).getDataSource(sqlType);
             realDataSourceName = namedDataSource.getName();
             if (getCachedConnections().containsKey(realDataSourceName)) {
